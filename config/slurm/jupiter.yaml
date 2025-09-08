@@ -1,0 +1,10 @@
+
+defaults:
+  - base
+  - _self_
+
+
+ntasks_per_node: 1
+gpus_per_node: 4
+gres: "gpu:4"
+template: "jupiter.sh"

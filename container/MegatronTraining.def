@@ -1,0 +1,55 @@
+Bootstrap: docker
+From: nvcr.io/nvidia/pytorch:25.08-py3
+Stage: spython-base
+
+%arguments
+    FROZEN_REQUIREMENTS_FILE=""
+
+
+%files
+    gen_constraints.py /workspace/gen_constraints.py
+    # reduce_requirements_from_installed.py /workspace/reduce_requirements_from_installed.py
+    requirements_latest.txt /workspace/requirements_latest.txt
+    ../Megatron-LM /workspace/Megatron-LM
+    {{ FROZEN_REQUIREMENTS_FILE }} /workspace/{{ FROZEN_REQUIREMENTS_FILE }}
+
+%post
+mkdir -p /workspace
+cd /workspace
+pip install --upgrade pip setuptools packaging
+# pip freeze | python /workspace/gen_constraints_from_pip_freeze.py | grep -vE 'packaging|wheel|ninja' > /workspace/constraints.txt
+
+# dill has a conflicting version
+python3 /workspace/gen_constraints.py -o /dev/stdout | grep -vE "(dill|fsspec)" > constraints.installed.txt
+
+if [ -n  /workspace/{{ FROZEN_REQUIREMENTS_FILE }} ] && [ -f /workspace/{{ FROZEN_REQUIREMENTS_FILE }} ]; then 
+    echo "" >> /workspace/constraints.installed.txt ;
+    cat /workspace/{{ FROZEN_REQUIREMENTS_FILE }} >> /workspace/constraints.installed.txt; 
+fi
+
+cat constraints.installed.txt
+
+cat requirements_latest.txt
+
+pip install --no-cache-dir -c constraints.installed.txt -r /workspace/requirements_latest.txt
+# install the dependency breaking packages
+pip install --no-cache-dir datasets wandb tensorflow
+
+pip install --no-cache-dir -c constraints.installed.txt -e /workspace/Megatron-LM
+
+pip uninstall -y megatron-core
+
+%runscript
+cd /workspace
+exec /bin/bash "$@"
+%startscript
+cd /workspace
+exec /bin/bash "$@"
+
+
+%labels
+    Author OpenSci
+    Version 0.1.0
+    Base nvcr.io/nvidia/pytorch:25.08-py3
+    Description Megatron container based on NVIDIA PyTorch with full HPC support
+

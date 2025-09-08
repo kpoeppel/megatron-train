@@ -1,0 +1,9 @@
+account: ${oc.env:SLURM_ACCOUNT,""}
+partition: ${oc.env:SLURM_PARTITION,""}
+time: "00:20:00"
+ntasks_per_node: 1
+gpus_per_node: 4
+gres: "gpu:4"
+threads_per_core: 1
+output: ${oc.env:OUTPUT_DIR}"/%j.out"
+nodes: 1

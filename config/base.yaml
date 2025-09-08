@@ -1,0 +1,9 @@
+defaults:
+  - megatron: base
+  - slurm: base
+  - env: base
+  - _self_
+
+experiment_name: debug
+total_num_gpus: ${oc.muli:${slurm.nodes},${slurm.gpus_per_node},${slurm.ntasks_per_node}}
+global_batch_size: ${oc.muli:${.total_num_gpus},${oc.int:${oc.select:megatron.micro_batch_size,1}}}
