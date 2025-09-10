@@ -36,13 +36,13 @@ pytest-pudb
 pre-commit
 lm_eval
 dacite
-compoconf
+compoconf>=0.1.9
 scipy
 safetensors
 tabulate
 tensorboard
 einops
-compoconf
 hydra-core
+omegaconf
 opt-einsum
 pandas

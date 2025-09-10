@@ -1,12 +1,12 @@
-from train_megatron.extract_hydra import run_hydra
-from train_megatron.config import get_cmdline_args, get_args_and_types, get_megatron_parser
+from megatron_train.extract_hydra import run_hydra
+from megatron_train.config import get_cmdline_args, get_args_and_types, get_megatron_parser
 import argparse
 from omegaconf import OmegaConf
 import yaml
-from dataclasses import make_dataclass, field, dataclass, is_dataclass
+from dataclasses import make_dataclass, field, dataclass, is_dataclass, MISSING
 from compoconf import parse_config, MissingValue, ConfigError, NonStrictDataclass, asdict
 from typing import Callable
-from train_megatron.slurm import get_slurm_template, generate_slurm_script
+from megatron_train.slurm import get_slurm_template, generate_slurm_script
 
 print(get_args_and_types(get_megatron_parser()))
 
@@ -46,16 +46,28 @@ class SlurmConfig(NonStrictDataclass):
 
 
 @dataclass(init=False)
-class TrainMegatronConfig(NonStrictDataclass):
+class LauncherConfig(NonStrictDataclass):
+    cmd: str = MISSING
+
+
+@dataclass(init=False)
+class SRunConfig(NonStrictDataclass):
+    opts: str = MISSING
+
+
+@dataclass(init=False)
+class MegatronTrainConfig(NonStrictDataclass):
     megatron: MegatronConfig = field(default_factory=MegatronConfig)
     slurm: SlurmConfig = field(default_factory=SlurmConfig)
     env: dict[str, str | int | float | None] = field(default_factory=dict)
+    launcher: LauncherConfig = field(default=LauncherConfig)
+    srun: SRunConfig = field(default=SRunConfig)
 
     global_batch_size: int = 1
     experiment_name: str = "debug"
 
 
-def slurm_script_from_config(config: TrainMegatronConfig) -> str:
+def slurm_script_from_config(config: MegatronTrainConfig, cmdline_args: list[str]) -> str:
     print(config.slurm)
     slurm_template = get_slurm_template(config.slurm.template, base_dir="./slurm_template")
 
@@ -69,7 +81,22 @@ def slurm_script_from_config(config: TrainMegatronConfig) -> str:
 
     env_exports = "\n".join(["export " + k + "=" + str(v) for k, v in config.env.items()])
 
-    slurm_script = generate_slurm_script(slurm_template, {"env_exports": env_exports, "sbatch_cmds": sbatch_cmds})
+    launcher = config.launcher.cmd
+
+    srun_opts = config.srun.opts
+
+    megatron_cmd = " ".join(["$RUN_DIR/Megatron-LM/pretrain_gpt.py"] + cmdline_args)
+
+    slurm_script = generate_slurm_script(
+        slurm_template,
+        {
+            "env_exports": env_exports,
+            "sbatch_cmds": sbatch_cmds,
+            "launcher": launcher,
+            "srun_opts": srun_opts,
+            "megatron_cmd": megatron_cmd,
+        },
+    )
 
     print(slurm_script)
 
@@ -98,9 +125,12 @@ def main():
     )
     config_yaml_base = yaml.safe_load(config_yaml)
     config = OmegaConf.create(config_yaml_base)
+
+    print(config)
+
     OmegaConf.resolve(config)
     config = OmegaConf.to_container(config)
-    config = parse_config(TrainMegatronConfig, config)
+    config = parse_config(MegatronTrainConfig, config)
 
     config_yaml_default = run_hydra(
         config_path=args.config_path,
@@ -110,9 +140,7 @@ def main():
     config_default = OmegaConf.create(config_yaml_base)
     OmegaConf.resolve(config_default)
     config_default = OmegaConf.to_container(config_default)
-    config_default = parse_config(TrainMegatronConfig, config_default)
-
-    print(is_dataclass(config.megatron))
+    config_default = parse_config(MegatronTrainConfig, config_default)
 
     cmdline_args = get_cmdline_args(
         asdict(config.megatron),
@@ -122,7 +150,7 @@ def main():
 
     print("MEGATRON CMDLINE:", cmdline_args)
 
-    slurm_script_from_config(config)
+    slurm_script_from_config(config, cmdline_args)
 
 
 if __name__ == "__main__":

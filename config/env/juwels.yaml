@@ -3,3 +3,38 @@ defaults:
   - _self_
 
 MACHINE_NAME: JUWELS
+
+NCCL_SOCKET_IFNAME: ib0
+GLOO_SOCKET_IFNAME: ib0
+
+NCCL_SOCKET_FAMILY: AF_INET  # Only affects NCCL socket fallback
+GLOO_SOCKET_FAMILY: AF_INET  # Affects PyTorch Gloo backend coordination
+
+TORCH_NCCL_ASYNC_ERROR_HANDLING: 1
+NCCL_ASYNC_ERROR_HANDLING: 1
+
+NCCL_TIMEOUT: 600  # 30 minutes timeout
+NCCL_IB_DISABLE: 0  # Enable InfiniBand if available
+
+NCCL_IB_HCA: mlx5
+NCCL_MIN_NCHANNELS: 32
+
+NCCL_SOCKET_NTHREADS: 4
+NCCL_NSOCKS_PERTHREAD: 1
+NCCL_P2P_DISABLE: 1
+
+HF_ALLOW_CODE_EVAL: "1"
+
+MASTER_ADDR: "$(scontrol show hostnames \"$SLURM_JOB_NODELIST\" | head -n 1)i" # run at runtime
+
+MASTER_PORT: 20073
+
+NUM_NODES: "$SLURM_JOB_NUM_NODES"
+
+GPUS_PER_NODE: 4
+NUM_GPUS_PER_NODE: 4
+NUM_GPUS: "$((NUM_GPUS_PER_NODE*SLURM_NNODES))"
+ARCH: "$(uname -m)"
+
+SLURM_CPUS_PER_TASK: 8 # Keep original cpus-per-task for juwels
+

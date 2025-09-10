@@ -28,7 +28,7 @@ sed -i 's;{{ FROZEN_REQUIREMENTS_FILE }} /workspace/{{ FROZEN_REQUIREMENTS_FILE 
 
 if [[ $3 == "--append-date" ]] || [[ $2 == "--append-date" ]]
 then
-APPDATE="_$(date +%d%m%Y)"
+APPDATE="_$(date +%m%d%Y)"
 else
 APPDATE=""
 fi

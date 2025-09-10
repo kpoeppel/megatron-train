@@ -1,0 +1,10 @@
+defaults:
+  - base
+  - _self_
+
+num_layers: 24
+hidden_dim: 2048
+num_attention_heads: 16
+num_query_groups: 8
+
+num_experts: 2

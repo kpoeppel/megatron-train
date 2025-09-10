@@ -2,6 +2,8 @@ defaults:
   - megatron: base
   - slurm: base
   - env: base
+  - launcher: base
+  - srun: base
   - _self_
 
 experiment_name: debug

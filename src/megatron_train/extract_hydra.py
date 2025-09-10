@@ -93,6 +93,7 @@ OmegaConf.register_new_resolver("oc.len", len, replace=True)
 OmegaConf.register_new_resolver("eval", eval, replace=True)
 OmegaConf.register_new_resolver("oc.slice", oc_slice, replace=True)
 OmegaConf.register_new_resolver("oc.floor_div", oc_floor_divide, replace=True)
+OmegaConf.register_new_resolver("oc.divi", oc_floor_divide, replace=True)
 OmegaConf.register_new_resolver("oc.ceil_div", oc_ceil_divide, replace=True)
 OmegaConf.register_new_resolver("oc.int", oc_int, use_cache=False)
 

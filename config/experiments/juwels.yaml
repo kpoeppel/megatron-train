@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - /base
+  - override /slurm: juwels
+  - override /env: juwels
+  - override /launcher: juwels
+  - override /srun: juwels
+  - _self_

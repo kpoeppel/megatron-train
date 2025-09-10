@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - juwels
+  - speed_test
+  - _self_
+
+megatron:
+  data_path: /p/project1/projectnucleus/franke5/data/datasets/cerebras-SlimPajama-627B/train/merged
