@@ -6,6 +6,9 @@ defaults:
   - srun: base
   - _self_
 
-experiment_name: debug
+experiment_name: debug_${oc.select:megatron.aux.model_name,""}
 total_num_gpus: ${oc.muli:${slurm.nodes},${slurm.gpus_per_node},${slurm.ntasks_per_node}}
 global_batch_size: ${oc.muli:${.total_num_gpus},${oc.int:${oc.select:megatron.micro_batch_size,1}}}
+
+output_dir: ${oc.env:OUTPUT_DIR,"."}/megatron_train_${oc.env:SUBMIT_TIMESTAMP,${.timestamp}}
+timestamp: ${oc.timestring:}

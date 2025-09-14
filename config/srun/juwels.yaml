@@ -1,1 +1,1 @@
-opts: "--wait=60 --cpus-per-task=280 --threads-per-core=1"
+opts: "--wait=60 --cpus-per-task=8 --threads-per-core=1"

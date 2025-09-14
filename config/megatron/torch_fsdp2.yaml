@@ -1,0 +1,6 @@
+overlap_param_gather: false
+use_distributed_optimizer: false
+use_torch_fsdp2: true
+data_parallel_sharding_strategy: optim_grads
+untie_embeddings_and_output_weights: true
+gradient_accumulation_fusion: false

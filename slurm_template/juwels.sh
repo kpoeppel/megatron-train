@@ -1,3 +1,5 @@
+#!/bin/bash
+
 {{ sbatch_cmds }}
 
 {{ env_exports }}
@@ -16,8 +18,5 @@ ml ParaStationMPI/5.11.0-1
 ml ParaStationMPI/5.11.0-1-mt
 ml ScaLAPACK/2.2.0-fb
 
-# mkdir -p {{ CHECKPOINT_PATH }}
-# mkdir -p {{  }}
 
-
-srun {{ srun_opts }} bash -c {{ launcher }} {{ megatron_cmd }}
+srun {{ srun_opts }} bash -c '{{ launcher }} {{ megatron_cmd }}'

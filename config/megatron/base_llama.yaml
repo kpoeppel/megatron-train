@@ -1,0 +1,47 @@
+defaults:
+  - base
+  - _self_
+
+position_embedding_type: rope
+rotary_base: 500000
+rotary_percent: 1.0
+
+seq_length: 4096
+vocab_size: 50304
+
+micro_batch_size: 4
+tensor_model_parallel_size: 1
+sequence_parallel: true
+max_position_embeddings: 131072
+
+normalization: RMSNorm
+norm_epsilon: 
+swiglu: true
+distributed_backend: nccl
+use_distributed_optimizer: true
+overlap_param_gather: true
+overlap_grad_reduce: true
+recompute_activations: true
+use_flash_attn: false
+bf16: true
+ckpt_format: torch_dist
+untie_embeddings_and_output_weights: true
+
+weight_decay: 0.05
+adam_beta1: 0.9
+adam_beta2: 0.95
+init_method_std: 0.02
+clip_grad: 1.0
+attention_dropout: 0.0
+hidden_dropout: 0.0
+lr_decay_style: "cosine"
+lr: 1e-3
+
+tokenizer_model: "EleutherAI/gpt-neox-20b"
+tokenizer_type: HuggingFaceTokenizer
+
+split: 989,10,1
+num_workers: 4
+
+min_lr: ${oc.mul:0.1,${.lr}}
+lr_warmup_iters: 2000

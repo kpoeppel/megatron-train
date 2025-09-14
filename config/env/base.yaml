@@ -5,18 +5,19 @@ SLURM_PARTITION: ${oc.env:SLURM_PARTITION,""}
 # NCCL and libraries
 TRITON_LIBCUDA_PATH: "/usr/local/cuda/lib64/stubs"
 NCCL_IB_TIMEOUT: 120
-CUDA_DEVICE_MAX_CONNECTIONS: 1
+# CUDA_DEVICE_MAX_CONNECTIONS: 1  # not supported with FSDP
 PYTHONPATH: "."
+PYTORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
 
 # HuggingFace from cache only
 HF_HUB_OFFLINE: 1
 TRANSFORMERS_OFFLINE: 1
 
 # project i/o related
-PROJECT_DIR: ${oc.env:PROJECT_DIR,""}
+PROJECT_DIR: ${oc.env:PROJECT_DIR,"."}
 APPTAINER_CACHE_DIR: ${oc.env:APPTAINER_CACHE_DIR,""}
 CONTAINER_CACHE_DIR: ${oc.env:CONTAINER_CACHE_DIR,""}
 RUN_DIR: ${.PROJECT_DIR}
-OUTPUT_DIR: ${oc.env:OUTPUT_DIR,""}
+OUTPUT_DIR: ${oc.env:OUTPUT_DIR,"."}
 
 MACHINEFILE: "\"${.PROJECT_DIR}/output/hostfile\""

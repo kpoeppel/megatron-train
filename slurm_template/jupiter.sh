@@ -1,6 +1,8 @@
+#!/bin/bash
+
 {{ sbatch_cmds }}
 
 {{ env_exports }}
 
-mkdir -p {{ CHECKPOINT_PATH }}
-mkdir -p {{  }}
+
+srun {{ srun_opts }} bash -c '{{ launcher }} {{ megatron_cmd }}'

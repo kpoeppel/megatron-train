@@ -1,6 +1,7 @@
 import yaml
-from train_megatron.config import get_megatron_parser, get_args_and_types
+from megatron_train.config import get_megatron_parser, get_args_and_types, get_choices_arg, get_help
 import argparse
+import re
 import enum
 
 
@@ -16,7 +17,7 @@ def to_value(obj_str: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base-config-file", default="config/megatron/base.yaml")
+    parser.add_argument("--base-config-file", default="config/megatron/base_empty.yaml")
     parser.add_argument("--exclude-args", type=str, default="")
     parser.add_argument("--override-defaults", nargs="*", default=[])
 
@@ -30,10 +31,29 @@ def main():
     megatron_config = get_args_and_types(
         megatron_parser, exclude_args=args.exclude_args.split(","), override_defaults=override_defaults
     )
-    megatron_config = {k: v[1].value if isinstance(v[1], enum.Enum) else v[1] for k, v in megatron_config.items()}
+    megatron_config = {
+        k: str(v[1]).split(".")[-1] if isinstance(v[1], enum.Enum) else v[1] for k, v in megatron_config.items()
+    }
+
+    megatron_cfgyaml = yaml.dump(megatron_config)
+
+    # add comments on options
+    for key in megatron_config:
+        choices = get_choices_arg(megatron_parser, key)
+        helpstr = get_help(megatron_parser, key)
+        if choices is not None or helpstr:
+            match = re.search(key + ":" + ".*", megatron_cfgyaml, flags=re.MULTILINE)
+            if match:
+                megatron_cfgyaml = (
+                    megatron_cfgyaml[: match.end()]
+                    + "  # "
+                    + (f"choices: {choices}, " if choices else "")
+                    + f"{helpstr}"
+                    + megatron_cfgyaml[match.end() :]
+                )
 
     with open(args.base_config_file, "w") as fp:
-        yaml.dump(megatron_config, fp)
+        fp.write(megatron_cfgyaml)
 
 
 if __name__ == "__main__":

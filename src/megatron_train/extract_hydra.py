@@ -6,6 +6,7 @@ from hydra import compose, initialize_config_dir
 from omegaconf import OmegaConf
 from omegaconf.listconfig import ListConfig
 import omegaconf
+from functools import lru_cache
 
 
 def safe_mul(*args):
@@ -57,6 +58,8 @@ def oc_mul_round_int(*args):
     return int(round(args[0] * args[1] / args[2]) * args[2])
 
 
+# only get the timestamp once
+@lru_cache
 def oc_timestring(*args):
     return datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")[:-3]
 

@@ -5,7 +5,8 @@ ntasks_per_node: 1
 gpus_per_node: 4
 gres: "gpu:4"
 threads_per_core: 1
-output: ${oc.env:OUTPUT_DIR,""}/%j.out
+output: ${output_dir}/%j.out   # ${oc.env:OUTPUT_DIR,""}/%j.out
 nodes: 1
 
 total_gpus: ${oc.muli:${.nodes},${.gpus_per_node}}
+template: "dummy.sh"

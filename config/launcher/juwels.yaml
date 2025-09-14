@@ -1,3 +1,3 @@
-image: "${oc.env:CONTAINER_CACHE_DIR,:}/MegatronTraining_x86_64_04092025.sif"
+image: "${oc.env:CONTAINER_CACHE_DIR,:}/MegatronTraining_x86_64_202509131424.sif"
 distributed_args: " --nproc-per-node ${slurm.gpus_per_node} --nnodes ${slurm.nodes}"
-cmd: "singularity exec --nv ${.image} python -u -m torch.distributed.run ${.distributed_args} --rdzv_endpoint $MASTER_ADDR:$MASTER_PORT --rdvz_backend static --max_restarts 0 --tee 3 --node_rank $SLURM_PROCID"
+cmd: "singularity exec --mount src=/p/,destination=/p/ --nv ${.image} python -u -m torch.distributed.run ${.distributed_args} --rdzv-endpoint $MASTER_ADDR:$MASTER_PORT --rdzv-backend static --max-restarts 0 --tee 3 --node-rank $SLURM_PROCID"

@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: 
+From: ${CONTAINER_CACHE_DIR}/pytorch_25.08_${ARCH}.sif
 
 # Bootstrap: docker
 # From: nvcr.io/nvidia/pytorch:25.08-py3
@@ -34,16 +34,15 @@ cat constraints.installed.txt
 cat requirements_latest.txt
 
 pip install --no-cache-dir -c constraints.installed.txt -r /workspace/requirements_latest.txt
-# install the dependency breaking packages
-pip install --no-cache-dir datasets wandb tensorflow
 
+# Install and uninstall megatron to install its dependencies
 pip install --no-cache-dir -c constraints.installed.txt -e /workspace/Megatron-LM
 
 pip uninstall -y megatron-core
 
 
 %test
-    python "import torch; import modelopt.torch.quantization as q; print('import ok')"
+    python -c "import torch; import modelopt.torch.quantization as q; print('import ok')"
 
 %runscript
 cd /workspace
