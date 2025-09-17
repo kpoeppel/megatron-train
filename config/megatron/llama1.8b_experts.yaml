@@ -1,12 +1,26 @@
 defaults:
-  - base
+  - base_llama
   - _self_
 
-num_layers: 24
 hidden_size: 2048
+num_layers: 26
 num_attention_heads: 16
-num_query_groups: 8
+num_query_groups: 2
+
+kv_channels: 128
+ffn_hidden_size: 8192
+seq_length: 4096
+vocab_size: 50304
+
+micro_batch_size: 4
+tensor_model_parallel_size: 1
 
 num_experts: 2
+moe_ffn_hidden_size: ${oc.divi:${.ffn_hidden_size},${.num_experts}}
+moe_grouped_gemm: true
+moe_layer_recompute: true
+moe_permute_fusion: true
 
 
+aux:
+  model_name: "llama1.8b_moe"

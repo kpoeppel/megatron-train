@@ -59,6 +59,8 @@ def mcfg_post_init(self):
     assert self.num_attention_heads is not None
     assert self.vocab_size is not None
     assert self.max_position_embeddings is not None
+    assert self.tokenizer_type is not None
+    assert self.tokenizer_model is not None
 
     assert not (self.use_distributed_optimizer and self.use_torch_fsdp2)
     assert not (self.use_megatron_fsdp and self.use_torch_fsdp2)
@@ -71,6 +73,8 @@ def mcfg_post_init(self):
     assert not (self.gradient_accumulation_fusion and self.use_torch_fsdp2)
 
     assert not (self.gradient_accumulation_fusion and self.data_parallel_sharding_strategy not in ["no_shard", "optim"])
+
+    assert not (self.num_experts > 1 and self.add_bias_linear)
 
 
 MegatronConfig.__post_init__ = mcfg_post_init
@@ -203,24 +207,13 @@ def main():
     config = OmegaConf.to_container(config)
     config = parse_config(MegatronTrainConfig, config)
 
-    # config_yaml_default = run_hydra(
-    #     config_path=args.config_path,
-    #     config_name=args.config_name_default,
-    # )
-    # config_yaml_base = yaml.safe_load(config_yaml_default)
-    # config_default = OmegaConf.create(config_yaml_base)
-    # OmegaConf.resolve(config_default)
-    # config_default = OmegaConf.to_container(config_default)
-    # config_default = parse_config(MegatronTrainConfig, config_default)
-
     cmdline_args = get_cmdline_args(
         asdict(config.megatron),
         skip_none=True,
         ignore_args=["aux"],
-        default_skip={},  # asdict(config_default.megatron) if not args.no_diff_to_default else {},
+        default_skip={},
         parser=get_megatron_parser(),
     )
-    # print("MEGATRON CMDLINE:", cmdline_args)
 
     slurm_script = slurm_script_from_config(config, cmdline_args)
 

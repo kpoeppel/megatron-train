@@ -22,10 +22,12 @@ use_distributed_optimizer: true
 overlap_param_gather: true
 overlap_grad_reduce: true
 recompute_activations: true
-use_flash_attn: false
+use_flash_attn: true
 bf16: true
 ckpt_format: torch_dist
 untie_embeddings_and_output_weights: true
+add_bias_linear: false
+add_qkv_bias: false
 
 weight_decay: 0.05
 adam_beta1: 0.9
