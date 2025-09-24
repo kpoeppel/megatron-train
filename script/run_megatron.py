@@ -76,6 +76,8 @@ def mcfg_post_init(self):
 
     assert not (self.num_experts > 1 and self.add_bias_linear)
 
+    assert self.group_query_attention or (self.num_query_groups == self.hidden_size // self.kv_channels)
+
 
 MegatronConfig.__post_init__ = mcfg_post_init
 
