@@ -4,6 +4,7 @@ from megatron_train.config import get_cmdline_args, get_args_and_types, get_mega
 
 import argparse
 import os
+import sys
 import yaml
 from dataclasses import make_dataclass, field, dataclass, fields, MISSING
 from omegaconf import OmegaConf
@@ -161,6 +162,15 @@ def slurm_script_from_config(config: MegatronTrainConfig, cmdline_args: list[str
 
     if config.nest_launcher:
         launcher = quote_bash(launcher)
+        if "{{ env_exports }}" in launcher:
+            launcher = launcher.replace(
+                "{{ env_exports }}", "; ".join(["export " + k + "=" + "'\"$" + k + "\"'" for k in config.env]) + "; "
+            )
+        if "{{ env_exports_singularity }}" in launcher:
+            launcher = launcher.replace(
+                "{{ env_exports_singularity }}", " ".join([f"--env {k}=${k}" for k in config.env])
+            )
+
         megatron_cmd = quote_bash(megatron_cmd)
 
     slurm_script = generate_slurm_script(
@@ -178,6 +188,7 @@ def slurm_script_from_config(config: MegatronTrainConfig, cmdline_args: list[str
 
 
 def main():
+    print("RUNNING:", sys.argv)
     parser = argparse.ArgumentParser()
     parser.add_argument("--config-path", type=str, default="./config", help="Path to config directory")
     parser.add_argument("--config-name", type=str, default="base", help="Name of base config file")

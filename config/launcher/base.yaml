@@ -1,1 +1,1 @@
-cmd: "apptainer exec --nv python"
+cmd: "python"

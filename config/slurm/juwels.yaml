@@ -4,6 +4,9 @@ defaults:
 
 
 ntasks_per_node: 1
+ntasks: ${.nodes}
 gpus_per_node: 4
 gres: "gpu:4"
 template: "juwels.sh"
+cpus_per_task: 8
+gpu_bind: "none"

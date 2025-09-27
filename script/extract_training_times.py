@@ -72,6 +72,7 @@ def flatten_dict(cfg: dict, sep="."):
 def main():
     parser = ArgumentParser()
     parser.add_argument("--base-dir", type=str, help="Experiments directory to get running times from")
+    parser.add_argument("--exp-dir-regex", type=str, default=".*")
     parser.add_argument("--log-file", type=str, default=r".*\.out$")
     parser.add_argument("--red-type", choices=["mean", "median", "max", "min"], default="median")
     parser.add_argument("--show-failed", action="store_true")
@@ -79,7 +80,7 @@ def main():
     parser.add_argument(
         "--extract-config",
         type=str,
-        default="aux.model_name,micro_batch_size,global_batch_size,seq_length,ffn_hidden_size,hidden_size,num_params,slurm.total_gpus,token_throughput",
+        default="aux.model_name,slurmid,micro_batch_size,global_batch_size,seq_length,num_params,slurm.total_gpus",
     )
 
     args = parser.parse_args()
@@ -104,7 +105,14 @@ def main():
     # ]
     cols = args.extract_config.split(",") + ["token_throughput"]
 
+    print([re.match(args.exp_dir_regex, log_dir) for log_dir in os.listdir(base_dir)])
+
     for log_dir in os.listdir(base_dir):
+        if not re.match(args.exp_dir_regex, log_dir):
+            print(f"Skipped: {log_dir}")
+            continue
+        else:
+            print(f"Taking: {log_dir}")
         exppath = Path(base_dir) / log_dir
         if os.path.isdir(exppath):
             cfgfile = [cfgfile for cfgfile in os.listdir(exppath) if re.match(args.cfg_file, cfgfile)]
@@ -123,6 +131,8 @@ def main():
                 for key in args.extract_config.split(",")
                 if key in cfg or "megatron." + key in cfg
             }
+
+            print(os.listdir(exppath))
 
             logfile = [logfile for logfile in os.listdir(exppath) if re.match(args.log_file, logfile)]
             if logfile:
@@ -149,13 +159,16 @@ def main():
                     res_dict["token_throughput"] = (
                         1000 * res_dict["batch_size_per_device"] * res_dict["seq_length"] / res_dict["itertime"]
                     )
+                    res_dict["slurmid"] = os.path.split(logfile)[1][:-4]
                     recs.append([res_dict[col] for col in cols])
+                    print(res_dict)
 
                 except KeyError:
                     pass
 
+    print(recs)
     df = pd.DataFrame(data=recs, columns=cols).sort_values(
-        by=["aux.model_name", "slurm.total_gpus"], ascending=[True, True]
+        by=["slurmid", "aux.model_name", "slurm.total_gpus"], ascending=[True, True, True]
     )
 
     print(df)
